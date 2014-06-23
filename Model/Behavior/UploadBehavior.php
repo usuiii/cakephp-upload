@@ -216,19 +216,18 @@ class UploadBehavior extends ModelBehavior {
 	public function beforeSave(Model $model, $options = array()) {
 		$this->_removingOnly = array();
 		foreach ($this->settings[$model->alias] as $field => $options) {
+
 			if (!isset($model->data[$model->alias][$field]) || !is_array($model->data[$model->alias][$field])) {
 				// it may have previously been set by a prior save using this same instance
 				unset($this->runtime[$model->alias][$field]);
 				continue;
 			}
-
 			$this->runtime[$model->alias][$field] = $model->data[$model->alias][$field];
 
 			$removing = !empty($model->data[$model->alias][$field]['remove']);
 			if ($removing || ($this->settings[$model->alias][$field]['deleteOnUpdate']
 			&& isset($model->data[$model->alias][$field]['name'])
-			&& strlen($model->data[$model->alias][$field]['name']))) {
-				// We're updating the file, remove old versions
+			&& strlen($model->data[$model->alias][$field]['name']))) {				// We're updating the file, remove old versions
 				if (!empty($model->id)) {
 					$data = $model->find('first', array(
 						'conditions' => array("{$model->alias}.{$model->primaryKey}" => $model->id),
@@ -239,12 +238,13 @@ class UploadBehavior extends ModelBehavior {
 				}
 
 				if ($removing) {
-					$model->data[$model->alias] = array(
-						$field => null,
-						$options['fields']['type'] => null,
-						$options['fields']['size'] => null,
-						$options['fields']['dir'] => null,
-					);
+					$model->data[$model->alias][$field] = null;
+					// $model->data[$model->alias] = array(
+					// 	$field => null,
+					// 	$options['fields']['type'] => null,
+					// 	$options['fields']['size'] => null,
+					// 	$options['fields']['dir'] => null,
+					// );
 
 					$this->_removingOnly[$field] = true;
 					continue;
